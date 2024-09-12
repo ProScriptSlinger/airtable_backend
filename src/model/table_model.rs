@@ -8,14 +8,14 @@ use crate::utils::{macros::map};
 use crate::repository::surrealdb_repo::{Creatable, Patchable, SurrealDBRepo};
 
 #[derive(Debug, Serialize, Deserialize)]
-pub struct Todo {
+pub struct Table {
     pub id: Option<String>,
     pub title: String,
     pub body: String,
 }
 
-impl From<Todo> for Value {
-    fn from(val: Todo) -> Self {
+impl From<Table> for Value {
+    fn from(val: Table) -> Self {
         match val.id {
             Some(v) => {
                 map![
@@ -34,16 +34,16 @@ impl From<Todo> for Value {
     }
 }
 
-impl Creatable for Todo{}
+impl Creatable for Table{}
 
 #[derive(Debug, Serialize, Deserialize)]
-pub struct TodoPatch {
+pub struct TablePatch {
     pub title: Option<String>,
     pub body: Option<String>,
 }
 
-impl From<TodoPatch> for Value {
-    fn from(val: TodoPatch) -> Self {
+impl From<TablePatch> for Value {
+    fn from(val: TablePatch) -> Self {
 
         let mut value: BTreeMap<String, Value> = BTreeMap::new();
         
@@ -58,15 +58,15 @@ impl From<TodoPatch> for Value {
     }
 }
 
-impl Patchable for TodoPatch {}
+impl Patchable for TablePatch {}
 
 
-pub struct TodoBMC;
+pub struct TableBMC;
 
-impl TodoBMC {
+impl TableBMC {
 
     pub async fn get_all(db: Data<SurrealDBRepo>) -> Result<Vec<Object>, Error> {
-        let ast = "SELECT * FROM todo;";
+        let ast = "SELECT * FROM table;";
 
         let res = db.ds.execute(ast, &db.ses, None, true).await?;
         
@@ -96,7 +96,7 @@ impl TodoBMC {
     pub async fn get(db: Data<SurrealDBRepo>, tid: &str) -> Result<Object, Error> {
         let sql = "SELECT * FROM $th";
             
-            let tid = format!("todo:{}", tid);
+            let tid = format!("table:{}", tid);
 
             let vars: BTreeMap<String, Value> = map!["th".into() => thing(&tid)?.into()];
     
@@ -111,7 +111,7 @@ impl TodoBMC {
     pub async fn update<T: Patchable>(db: Data<SurrealDBRepo>, tid: &str, data: T) -> Result<Object, Error> {
 		let sql = "UPDATE $th MERGE $data RETURN *";
 
-        let tid = format!("todo:{}", tid);
+        let tid = format!("table:{}", tid);
 
 		let vars = map![
 			"th".into() => thing(&tid)?.into(),
@@ -129,7 +129,7 @@ impl TodoBMC {
     pub async fn delete(db: Data<SurrealDBRepo>, tid: &str) -> Result<String, Error> {
 		let sql = "DELETE $th RETURN *";
 
-        let tid = format!("todo:{}", tid);
+        let tid = format!("table:{}", tid);
 
 		let vars = map!["th".into() => thing(&tid)?.into()];
 

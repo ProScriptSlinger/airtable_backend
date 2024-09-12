@@ -1,1 +1,1 @@
-pub mod todo_api;
+pub mod table_api;
